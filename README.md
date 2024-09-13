@@ -14,7 +14,7 @@
 
 `BindingResult` 가 있으면 오류 정보( `FieldError` )를 `BindingResult` 에 담아서 컨트롤러를 정상 호출한다.
 
-**BindingResult에 검증 오류를 적용하는 3가지 방법**
+## BindingResult에 검증 오류를 적용하는 3가지 방법
 
 `@ModelAttribute` 의 객체에 타입 오류 등으로 바인딩이 실패하는 경우 스프링이 `FieldError` 생성해서`BindingResult  에 넣어준다.
 
@@ -34,7 +34,7 @@
 
 `BindingResult` 는 Model에 자동으로 포함된다.
 
-**BindingResult와 Errors** 
+## BindingResult와 Errors 
 
 `org.springframework.validation.Errors` 
 
@@ -51,5 +51,40 @@
 `addError()` 도 `BindingResult` 가 제공하므로 여기서는 `BindingResult` 를 사용하자. 
 
 주로 관례상 `BindingResult` 를 많이 사용한다.
+
+
+## FieldError 생성자
+
+`FieldError` 는 두 가지 생성자를 제공한다.
+
+```java
+ public FieldError(String objectName, String field, String defaultMessage);
+ public FieldError(String objectName, String field, @Nullable Object
+ rejectedValue, boolean bindingFailure, @Nullable String[] codes, @Nullable
+ Object[] arguments, @Nullable String defaultMessage);
+```
+
+파라미터 목록
+
+`objectName` : 오류가 발생한 객체 이름
+
+`field` : 오류 필드
+
+`rejectedValue` : 사용자가 입력한 값(거절된 값)
+
+`bindingFailure` : 타입 오류 같은 바인딩 실패인지, 검증 실패인지 구분 값 `codes` : 메시지 코드
+
+`arguments` : 메시지에서 사용하는 인자
+
+`defaultMessage` : 기본 오류 메시지
+
+
+```java
+
+bindingResult.addError(new FieldError("item", "quantity", item.getQuantity(), false, null, null, "수량은 9999개까지 입니다"));
+
+```
+
+`ObjectError` 도 유사하게 두 가지 생성자를 제공한다. 코드를 참고하자.
 
 
