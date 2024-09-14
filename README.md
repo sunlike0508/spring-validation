@@ -87,4 +87,131 @@ bindingResult.addError(new FieldError("item", "quantity", item.getQuantity(), fa
 
 `ObjectError` 도 유사하게 두 가지 생성자를 제공한다. 코드를 참고하자.
 
+### rejectValue()
+
+```java
+void rejectValue(@Nullable String field, String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage);
+```
+
+`field` : 오류 필드명
+
+`errorCode` : 오류 코드(이 오류 코드는 메시지에 등록된 코드가 아니다. 뒤에서 설명할 messageResolver를 위한 오류 코드이다.)
+
+`errorArgs` : 오류 메시지에서 `{0}` 을 치환하기 위한 값
+
+`defaultMessage` : 오류 메시지를 찾을 수 없을 때 사용하는 기본 메시지
+
+### reject()
+
+```java
+void reject(String errorCode, @Nullable Object[] errorArgs, @Nullable String defaultMessage);
+```
+
+
+**축약된 오류 코드**
+
+`FieldError()` 를 직접 다룰 때는 오류 코드를 `range.item.price` 와 같이 모두 입력했다. 
+
+그런데 `rejectValue()` 를 사용하고 부터는 오류 코드를 `range` 로 간단하게 입력했다. 
+
+그래도 오류 메시지를 잘 찾아서 출력한다. 이 부분을 이해하려면 `MessageCodesResolver` 를 이해해야 한다.
+
+```properties
+#Level1
+required.item.itemName: 상품 이름은 필수 입니다. #Level2
+required: 필수 값 입니다.
+```
+물론 이렇게 객체명과 필드명을 조합한 메시지가 있는지 우선 확인하고, 없으면 좀 더 범용적인 메시지를 선택하도록 추가 개발을 해야겠지만, 범용성 있게 잘 개발해두면, 메시지의 추가 만으로 매우 편리하게 오류 메시지를 관리할 수 있을 것이다.
+
+
+## MessageCodesResolver
+
+검증 오류 코드로 메시지 코드들을 생성한다.
+
+`MessageCodesResolver` 인터페이스이고 `DefaultMessageCodesResolver` 는 기본 구현체이다. 
+
+주로 다음과 함께 사용 `ObjectError` , `FieldError`
+
+### DefaultMessageCodesResolver의 기본 메시지 생성 규칙
+
+```java
+MessageCodesResolver messageCodesResolver = new DefaultMessageCodesResolver();
+```
+**동작 방식**
+
+`rejectValue()` , `reject()` 는 내부에서 `MessageCodesResolver` 를 사용한다. 여기에서 메시지 코드들
+을 생성한다.
+
+`FieldError` , `ObjectError` 의 생성자를 보면, 오류 코드를 하나가 아니라 여러 오류 코드를 가질 수 있다. 
+
+`MessageCodesResolver` 를 통해서 생성된 순서대로 오류 코드를 보관한다.
+
+이 부분을 `BindingResult` 의 로그를 통해서 확인해보자.
+
+`codes [range.item.price, range.price, range.java.lang.Integer, range]`
+
+**FieldError** 
+
+`rejectValue("itemName", "required")` 다음 4가지 오류 코드를 자동으로 생성
+
+`required.item.itemName` `required.itemName` `required.java.lang.String` `required`
+
+**ObjectError** 
+
+`reject("totalPriceMin")` 다음 2가지 오류 코드를 자동으로 생성
+
+`totalPriceMin.item` `totalPriceMin`
+
+## 오류코드 관리 전략
+
+핵심은 구체적인 것에서 공통적인 것으로
+
+크게 중요하지 않은 것은 공통적인 것으로 하는 것이 정신건강(?)에 좋음
+
+
+## Validator
+
+```java
+public interface Validator {
+     boolean supports(Class<?> clazz);
+     void validate(Object target, Errors errors);
+}
+```
+
+`supports() {}` : 해당 검증기를 지원하는 여부 확인.
+
+`validate(Object target, Errors errors)` : 검증 대상 객체와 `BindingResult`
+
+```java
+@InitBinder
+public void init(WebDataBinder dataBinder) {
+    log.info("init binder {}", dataBinder);
+    dataBinder.addValidators(itemValidator);
+}
+
+@PostMapping("/add")
+public String addItemV6(@Validated @ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes);
+```
+
+이렇게 `WebDataBinder` 에 검증기를 추가하면 해당 컨트롤러에서는 검증기를 자동으로 적용할 수 있다.
+
+`@InitBinder` 해당 컨트롤러에만 영향을 준다. 글로벌 설정은 별도로 해야한다.
+
+검증 대상 앞에 `@Validated` 를 붙인다.
+
+**글로벌 설정**
+
+```java
+@SpringBootApplication
+public class ItemServiceApplication implements WebMvcConfigurer {
+    public static void main(String[] args) {
+        SpringApplication.run(ItemServiceApplication.class, args);
+    }
+    @Override
+    public Validator getValidator() {
+        return new ItemValidator();
+    }
+}
+
+```
 
