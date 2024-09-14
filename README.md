@@ -215,3 +215,18 @@ public class ItemServiceApplication implements WebMvcConfigurer {
 
 ```
 
+# Bean Validation
+
+먼저 Bean Validation은 특정한 구현체가 아니라 Bean Validation 2.0(JSR-380)이라는 기술 표준이다. 
+
+쉽게 이야 기해서 검증 애노테이션과 여러 인터페이스의 모음이다. 
+
+마치 JPA가 표준 기술이고 그 구현체로 하이버네이트가 있는 것과 같다.
+
+`@NotBlank` : 빈값 + 공백만 있는 경우를 허용하지 않는다.
+
+`@NotNull` : `null` 을 허용하지 않는다.
+
+`@Range(min = 1000, max = 1000000)` : 범위 안의 값이어야 한다. 
+
+`@Max(9999)` : 최대 9999까지만 허용한다.
