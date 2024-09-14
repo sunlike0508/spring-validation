@@ -280,9 +280,30 @@ BeanValidator는 바인딩에 실패한 필드는 BeanValidation을 적용하지
 
 ## Groups
 
+그룹보단 보통 전송 객체 분리를 사용하긴 한다.
 
+## HTTP 메시지 컨버터
 
+**@ModelAttribute vs @RequestBody**
 
+HTTP 요청 파리미터를 처리하는 `@ModelAttribute` 는 각각의 필드 단위로 세밀하게 적용된다.
+
+그래서 특정 필드 에 타입이 맞지 않는 오류가 발생해도 나머지 필드는 정상 처리할 수 있었다.
+
+`HttpMessageConverter` 는 `@ModelAttribute` 와 다르게 각각의 필드 단위로 적용되는 것이 아니라, 전체 객체 단위로 적용된다.
+
+따라서 메시지 컨버터의 작동이 성공해서 `ItemSaveForm` 객체를 만들어야 `@Valid` , `@Validated` 가 적용된다.
+
+`@ModelAttribute` 는 필드 단위로 정교하게 바인딩이 적용된다.
+
+특정 필드가 바인딩 되지 않아도 나머지 필드 는 정상 바인딩 되고, Validator를 사용한 검증도 적용할 수 있다.
+
+`@RequestBody` 는 HttpMessageConverter 단계에서 JSON 데이터를 객체로 변경하지 못하면 이후 단계 자 체가 진행되지 않고 예외가 발생한다.
+
+컨트롤러도 호출되지 않고, Validator도 적용할 수 없다.
+
+**참고**
+`HttpMessageConverter` 단계에서 실패하면 예외가 발생한다. 예외 발생시 원하는 모양으로 예외를 처리하자.
 
 
 

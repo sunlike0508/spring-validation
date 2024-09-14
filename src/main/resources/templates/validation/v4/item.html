@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <link href="../css/bootstrap.min.css"
+          rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <style>
+        .container {
+            max-width: 560px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="py-5 text-center">
+        <h2 th:text="#{page.item}">상품 상세</h2>
+    </div>
+
+    <!-- 추가 -->
+    <h2 th:if="${param.status}" th:text="'저장 완료'"></h2>
+
+    <div>
+        <label for="itemId" th:text="#{label.item.id}">상품 ID</label>
+        <input class="form-control" id="itemId" name="itemId" readonly th:value="${item.id}" type="text" value="1">
+    </div>
+    <div>
+        <label for="itemName" th:text="#{label.item.itemName}">상품명</label>
+        <input class="form-control" id="itemName" name="itemName" readonly th:value="${item.itemName}" type="text"
+               value="상품A">
+    </div>
+    <div>
+        <label for="price" th:text="#{label.item.price}">가격</label>
+        <input class="form-control" id="price" name="price" readonly th:value="${item.price}" type="text" value="10000">
+    </div>
+    <div>
+        <label for="quantity" th:text="#{label.item.quantity}">수량</label>
+        <input class="form-control" id="quantity" name="quantity" readonly th:value="${item.quantity}" type="text"
+               value="10">
+    </div>
+
+    <hr class="my-4">
+
+    <div class="row">
+        <div class="col">
+            <button class="w-100 btn btn-primary btn-lg"
+                    onclick="location.href='editForm.html'"
+                    th:onclick="|location.href='@{/validation/v4/items/{itemId}/edit(itemId=${item.id})}'|"
+                    th:text="#{page.updateItem}" type="button">상품 수정
+            </button>
+        </div>
+        <div class="col">
+            <button class="w-100 btn btn-secondary btn-lg"
+                    onclick="location.href='items.html'"
+                    th:onclick="|location.href='@{/validation/v4/items}'|"
+                    th:text="#{button.cancel}" type="button">목록으로
+            </button>
+        </div>
+    </div>
+
+</div> <!-- /container -->
+</body>
+</html>
